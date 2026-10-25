@@ -8,7 +8,7 @@ on:
 jobs:
   publish:
     runs-on: ubuntu-latest
-    environment: production # Должно совпадать с полем "Environment" на NuGet
+    environment: production
     permissions:
       id-token: write 
       contents: read
