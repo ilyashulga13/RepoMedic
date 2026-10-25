@@ -23,7 +23,7 @@ jobs:
           dotnet-version: '8.0.x'
 
       - name: Pack
-        run: dotnet pack repomedic/RepoMedic.csproj -c Release -o ./artifacts
+        run: dotnet pack **/*.csproj -c Release -o ./artifacts
 
       - name: NuGet login (OIDC)
         id: login
