@@ -1,5 +1,11 @@
 # RepoMedic 🩺
 
+[![NuGet](https://img.shields.io/nuget/v/RepoMedic.svg)](https://www.nuget.org/packages/RepoMedic)
+[![Publish to NuGet](https://github.com/ilyashulga13/RepoMedic/actions/workflows/publish.yml/badge.svg)](https://github.com/ilyashulga13/RepoMedic/actions/workflows/publish.yml)
+
+**RepoMedic** is a simple and fast CLI tool written in C# that checks the health of your GitHub repository. 
+...
+
 **RepoMedic** is a simple and fast CLI tool written in C# that checks the health of your GitHub repository. 
 It verifies if your project has the essential files needed for open-source development and gives it a score out of 100!
 
