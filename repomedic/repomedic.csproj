@@ -8,7 +8,7 @@
 		<PackAsTool>true</PackAsTool>
 		<ToolCommandName>repomedic</ToolCommandName>
 		<PackageId>RepoMedic</PackageId>
-		<Version>1.0.2</Version>
+		<Version>1.0.3</Version>
 		<Authors>2bytes</Authors>
 		<Description>Checks GitHub repository health.</Description>
 		<PackageReadmeFile>README.md</PackageReadmeFile>
