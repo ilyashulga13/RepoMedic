@@ -45,7 +45,6 @@ namespace repomedic
             Console.WriteLine("Please enter your repository: ");
             var repo = Console.ReadLine();
 
-
             //Enter token
             Console.Write("Please enter your github token (or press Enter to skip): ");
             token = Console.ReadLine();
@@ -76,6 +75,16 @@ namespace repomedic
 
             }
 
+            try
+            {
+                await github.Repository.Get(owner, repo);
+            }
+            catch (NotFoundException)
+            {
+                Console.WriteLine("Error: Repository not found!");
+                return;
+            }
+
 
             //Conclusion
             Console.WriteLine("\nChecking repository...\n");
@@ -88,10 +97,17 @@ namespace repomedic
 
             //output and solution
             Console.WriteLine(hasREADME ? "[OK] README.md found!\n" : "[X] README.md not found.\n Add README.md in your repository\n");
-
             Console.WriteLine(hasGitignore ? "[OK] .gitignore found!\n" : "[X] .gitignore not found.\n Add .gitignore in your repository\n");
-
             Console.WriteLine(hasLICENSE ? "[OK] LICENSE found!\n" : "[X] LICENSE not found.\n Add LICENSE in your repository\n");
+
+
+            //SCORE system
+            int score = 0;
+            if (hasREADME) score += 33;
+            if (hasGitignore) score += 33;
+            if (hasLICENSE) score += 33;
+            if (score == 99) score = 100;
+            Console.WriteLine($"\nYour score: {score}/100");
         }
     }
 }
