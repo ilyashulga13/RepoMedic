@@ -19,7 +19,33 @@ namespace repomedic
             catch (NotFoundException) { check[0] = false; }
             catch (RateLimitExceededException)
             {
-                Console.WriteLine("The limit of requests has expired!!!");
+                Console.WriteLine("Error: The limit of requests has expired!!!");
+            }
+
+            try
+            {
+
+                var file = await github.Repository.Content.GetAllContents(owner, repo, ".gitignore");
+                check[1] = true;
+
+            }
+            catch (NotFoundException) { check[1] = false; }
+            catch (RateLimitExceededException)
+            {
+                Console.WriteLine("Error: The limit of requests has expired!!!");
+            }
+
+            try
+            {
+
+                var file = await github.Repository.Content.GetAllContents(owner, repo, "LICENSE");
+                check[2] = true;
+
+            }
+            catch (NotFoundException) { check[2] = false; }
+            catch (RateLimitExceededException)
+            {
+                Console.WriteLine("Error: The limit of requests has expired!!!");
             }
 
 
@@ -28,8 +54,10 @@ namespace repomedic
         }
 
 
-        static void Main(string[] args)
+        static async Task Main(string[] args)
         {
+
+            Console.OutputEncoding = System.Text.Encoding.UTF8;
 
             //Initilization github
             GitHubClient? github = null;
@@ -50,17 +78,11 @@ namespace repomedic
 
 
             //Enter token
-            try
-            {
-                Console.Write("Please enter your github token: ");
-                token = Console.ReadLine();
-            }
-            catch (AuthorizationException)
-            {
-                Console.WriteLine("The token is incorrect, please enter the correct one!!!");
-            }
+            Console.Write("Please enter your github token (or press Enter to skip): ");
+            token = Console.ReadLine();
+            
 
-            if (token != null)
+            if (!string.IsNullOrEmpty(token))
             {
                 //If you have entered your token, you will have 5000 requests per hour
 
@@ -78,7 +100,45 @@ namespace repomedic
 
             }
 
+            if (string.IsNullOrEmpty(owner) || string.IsNullOrEmpty(repo))
+            {
+                Console.WriteLine("Error: username and repository cannot be empty.");
+                return;
+            }
 
+            //Conclusion
+            Console.WriteLine("\nChecking repository...");
+            bool[] result = await Checks(github, owner, repo);
+
+            //README.md
+            if (result[0])
+            {
+                Console.WriteLine("[OK] README.md found!");
+            }
+            else
+            {
+                Console.WriteLine("[X] README.md not found.");
+            }
+
+            //.gitignore
+            if (result[1])
+            {
+                Console.WriteLine("[OK] .gitignore found!");
+            }
+            else
+            {
+                Console.WriteLine("[X] .gitignore not found.");
+            }
+
+            //LICENSE
+            if (result[2])
+            {
+                Console.WriteLine("[OK] LICENSE found!");
+            }
+            else
+            {
+                Console.WriteLine("[X] LICENSE not found.");
+            }
 
         }
     }
