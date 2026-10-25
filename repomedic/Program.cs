@@ -4,55 +4,24 @@ namespace repomedic
 {
     internal class Program
     {
-        private static async Task<bool[]> Checks(GitHubClient github, string? owner, string? repo)
+
+        private static async Task<bool> FileExists(GitHubClient github, string? owner, string? repo, string? filename)
         {
-
-            bool[] check = { false, false, false};
-
             try
             {
-
-                var file = await github.Repository.Content.GetAllContents(owner, repo, "README.md");
-                check[0] = true;
-
+                await github.Repository.Content.GetAllContents(owner, repo, filename);
+                return true;
             }
-            catch (NotFoundException) { check[0] = false; }
+            catch (NotFoundException)
+            {
+                return false; //no file
+            }
             catch (RateLimitExceededException)
             {
                 Console.WriteLine("Error: The limit of requests has expired!!!");
+                return false;
             }
-
-            try
-            {
-
-                var file = await github.Repository.Content.GetAllContents(owner, repo, ".gitignore");
-                check[1] = true;
-
-            }
-            catch (NotFoundException) { check[1] = false; }
-            catch (RateLimitExceededException)
-            {
-                Console.WriteLine("Error: The limit of requests has expired!!!");
-            }
-
-            try
-            {
-
-                var file = await github.Repository.Content.GetAllContents(owner, repo, "LICENSE");
-                check[2] = true;
-
-            }
-            catch (NotFoundException) { check[2] = false; }
-            catch (RateLimitExceededException)
-            {
-                Console.WriteLine("Error: The limit of requests has expired!!!");
-            }
-
-
-
-            return check;
         }
-
 
         static async Task Main(string[] args)
         {
@@ -80,7 +49,14 @@ namespace repomedic
             //Enter token
             Console.Write("Please enter your github token (or press Enter to skip): ");
             token = Console.ReadLine();
-            
+
+
+            if (string.IsNullOrEmpty(owner) || string.IsNullOrEmpty(repo))
+            {
+                Console.WriteLine("Error: username and repository cannot be empty.");
+                return;
+            }
+
 
             if (!string.IsNullOrEmpty(token))
             {
@@ -100,46 +76,22 @@ namespace repomedic
 
             }
 
-            if (string.IsNullOrEmpty(owner) || string.IsNullOrEmpty(repo))
-            {
-                Console.WriteLine("Error: username and repository cannot be empty.");
-                return;
-            }
 
             //Conclusion
-            Console.WriteLine("\nChecking repository...");
-            bool[] result = await Checks(github, owner, repo);
+            Console.WriteLine("\nChecking repository...\n");
 
-            //README.md
-            if (result[0])
-            {
-                Console.WriteLine("[OK] README.md found!");
-            }
-            else
-            {
-                Console.WriteLine("[X] README.md not found.");
-            }
+            bool hasREADME = await FileExists(github, owner, repo, "README.md");
+            bool hasGitignore = await FileExists(github, owner, repo, ".gitignore");
+            bool hasLICENSE = await FileExists(github, owner, repo, "LICENSE")
+                || await FileExists(github, owner, repo, "LICENSE.md")
+                || await FileExists(github, owner, repo, "LICENSE.txt");
 
-            //.gitignore
-            if (result[1])
-            {
-                Console.WriteLine("[OK] .gitignore found!");
-            }
-            else
-            {
-                Console.WriteLine("[X] .gitignore not found.");
-            }
+            //output and solution
+            Console.WriteLine(hasREADME ? "[OK] README.md found!\n" : "[X] README.md not found.\n Add README.md in your repository\n");
 
-            //LICENSE
-            if (result[2])
-            {
-                Console.WriteLine("[OK] LICENSE found!");
-            }
-            else
-            {
-                Console.WriteLine("[X] LICENSE not found.");
-            }
+            Console.WriteLine(hasGitignore ? "[OK] .gitignore found!\n" : "[X] .gitignore not found.\n Add .gitignore in your repository\n");
 
+            Console.WriteLine(hasLICENSE ? "[OK] LICENSE found!\n" : "[X] LICENSE not found.\n Add LICENSE in your repository\n");
         }
     }
 }
