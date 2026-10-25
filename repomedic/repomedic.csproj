@@ -5,21 +5,23 @@
 		<TargetFramework>net8.0</TargetFramework>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
+
 		<PackAsTool>true</PackAsTool>
 		<ToolCommandName>repomedic</ToolCommandName>
+
 		<PackageId>RepoMedic</PackageId>
-		<Version>1.0.4</Version>
+		<Version>1.0.5</Version>
 		<Authors>2bytes</Authors>
 		<Description>Checks GitHub repository health.</Description>
 		<PackageReadmeFile>README.md</PackageReadmeFile>
 	</PropertyGroup>
 
 	<ItemGroup>
-		<None Include="README.md" Pack="true" PackagePath="\" />
+		<PackageReference Include="Octokit" Version="14.0.0" />
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Octokit" Version="14.0.0" />
+		<None Include="../README.md" Pack="true" PackagePath="\" />
 	</ItemGroup>
 
 </Project>
