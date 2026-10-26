@@ -10,7 +10,7 @@
 		<ToolCommandName>repomedic</ToolCommandName>
 
 		<PackageId>RepoMedic</PackageId>
-		<Version>1.0.9</Version>
+		<Version>1.1.0</Version>
 		<Authors>2bytes</Authors>
 		<Description>Checks GitHub repository health.</Description>
 		<PackageReadmeFile>README.md</PackageReadmeFile>
