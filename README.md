@@ -40,14 +40,21 @@ Once installed, simply run the command in your terminal:
 repomedic
 ```
 
-The app will ask you for a GitHub username, repository name, and (optionally) your GitHub token.
+
+The app will ask you for a GitHub repository (you can paste a full URL like `https://github.com/user/repo` or just `user/repo`), and optionally your GitHub token.
+
+Here is what it looks like:
 
 ```text
-Please enter your username: 
-ilyashulga13
-Please enter your repository: 
-RepoMedic
-Please enter your github token (or press Enter to skip): 
+Please enter GitHub repository (URL or owner/repo): 
+ilyashulga13/RepoMedic
+
+Tip: A GitHub token increases your API limit from 60 to 5000 requests/hour.
+Please enter your GitHub token (or press Enter to skip): 
+
+----------------------------------------
+Checking: ilyashulga13/RepoMedic
+----------------------------------------
 
 Checking repository...
 
@@ -57,6 +64,11 @@ Checking repository...
 
 [OK] LICENSE found!
 
+[OK] GitHub Actions found!
+
+[OK] Repository Description found!
+
+----------------------------------------
 Your score: 100/100
 ```
 
