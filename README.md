@@ -7,7 +7,7 @@
 
 ## Why use RepoMedic?
 
-When you are starting a new project, it's easy to forget the small but crucial details that make a repository look professional. Recruiters, open-source contributors, and other developers look for things like a README, a license, and a `.gitignore`. 
+When starting a new project, it is easy to forget the small but crucial details that make a repository look professional. Recruiters, open-source contributors, and other developers look for things like a README, a license, and a `.gitignore`. 
 
 RepoMedic automates this check. It acts like a doctor for your repository, telling you exactly what is missing and how to fix it before you share your project with the world.
 
@@ -27,3 +27,77 @@ Open your terminal and run:
 
 ```bash
 dotnet tool install --global RepoMedic
+```
+
+*Note: To update to the latest version in the future, use `dotnet tool update --global RepoMedic`.*
+
+## Usage
+
+Once installed, simply run the command in your terminal:
+
+```bash
+repomedic
+```
+
+The app will ask you for a GitHub username, repository name, and (optionally) your GitHub token.
+
+```text
+Please enter your username: 
+ilyashulga13
+Please enter your repository: 
+RepoMedic
+Please enter your github token (or press Enter to skip): 
+
+Checking repository...
+
+[OK] README.md found!
+
+[OK] .gitignore found!
+
+[OK] LICENSE found!
+
+Your score: 100/100
+```
+
+### How the Scoring Works
+
+Every repository starts with 0 points. RepoMedic checks for 3 essential files:
+- **README.md**: +33 points
+- **.gitignore**: +33 points
+- **LICENSE**: +33 points
+
+If you have all three, you get a final score of 100/100.
+
+### Why should I use a token?
+
+If you skip the token, GitHub allows 60 requests per hour. This is usually enough for a few checks, but if you plan to check many repositories, you might hit the limit.
+By providing a Personal Access Token (PAT), the limit increases to 5000 requests per hour. The token is not saved anywhere on your computer; it is only used for the current session.
+
+## Build from source
+
+If you want to contribute to the code, test new features, or just see how it works under the hood:
+
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/ilyashulga13/RepoMedic.git
+   ```
+2. Navigate to the project folder:
+   ```bash
+   cd RepoMedic
+   ```
+3. Run the app:
+   ```bash
+   dotnet run
+   ```
+
+## Contributing
+
+This project is open for contributions! If you have an idea for a new feature (like checking for `CONTRIBUTING.md` or accepting full URLs instead of separate owner/repo names), feel free to open an Issue or submit a Pull Request.
+
+## About the Author
+
+Hi, I'm Ilya, a 13-year-old developer. I built this tool to practice C# and to help beginners build better open-source projects. I wrote the code myself with some guidance from a mentor. I am actively improving this project and listening to feedback, so feel free to reach out!
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
