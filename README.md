@@ -66,8 +66,6 @@ Checking repository...
 
 [OK] GitHub Actions found!
 
-[OK] Repository Description found!
-
 ----------------------------------------
 Your score: 100/100
 ```
