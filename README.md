@@ -92,7 +92,7 @@ If you want to contribute to the code, test new features, or just see how it wor
 
 ## Contributing
 
-This project is open for contributions! If you have an idea for a new feature (like checking for `CONTRIBUTING.md` or accepting full URLs instead of separate owner/repo names), feel free to open an Issue or submit a Pull Request.
+I would love some help with this project! If you have an idea for a new feature (like checking for `CONTRIBUTING.md` or accepting full GitHub URLs instead of separate owner/repo names), please open an Issue or send a Pull Request. Any advice or feedback is welcome!
 
 ## About the Author
 
