@@ -16,6 +16,7 @@ RepoMedic automates this check. It acts like a doctor for your repository, telli
 - Checks for a `README.md` file (essential for explaining your project).
 - Checks for a `.gitignore` file (prevents you from committing unnecessary files like `bin/` or `obj/`).
 - Checks for a `LICENSE` file (supports `LICENSE`, `LICENSE.md`, and `LICENSE.txt`).
+- Checks if GitHub Actions are set up (in the `.github/workflows` folder).
 - Provides helpful tips on what to add if a file is missing.
 - Gives a final health score out of 100 to gamify the process.
 
@@ -39,14 +40,21 @@ Once installed, simply run the command in your terminal:
 repomedic
 ```
 
-The app will ask you for a GitHub username, repository name, and (optionally) your GitHub token.
+
+The app will ask you for a GitHub repository (you can paste a full URL like `https://github.com/user/repo` or just `user/repo`), and optionally your GitHub token.
+
+Here is what it looks like:
 
 ```text
-Please enter your username: 
-ilyashulga13
-Please enter your repository: 
-RepoMedic
-Please enter your github token (or press Enter to skip): 
+Please enter GitHub repository (URL or owner/repo): 
+ilyashulga13/RepoMedic
+
+Tip: A GitHub token increases your API limit from 60 to 5000 requests/hour.
+Please enter your GitHub token (or press Enter to skip): 
+
+----------------------------------------
+Checking: ilyashulga13/RepoMedic
+----------------------------------------
 
 Checking repository...
 
@@ -56,17 +64,21 @@ Checking repository...
 
 [OK] LICENSE found!
 
+[OK] GitHub Actions found!
+
+----------------------------------------
 Your score: 100/100
 ```
 
 ### How the Scoring Works
 
-Every repository starts with 0 points. RepoMedic checks for 3 essential files:
-- **README.md**: +33 points
-- **.gitignore**: +33 points
-- **LICENSE**: +33 points
+Every repository starts with 0 points. RepoMedic checks for 4 essential things:
+- **README.md**: +25 points
+- **.gitignore**: +25 points
+- **LICENSE**: +25 points
+- **GitHub Actions**: +25 points
 
-If you have all three, you get a final score of 100/100.
+If you have all four, you get a final score of 100/100.
 
 ### Why should I use a token?
 
