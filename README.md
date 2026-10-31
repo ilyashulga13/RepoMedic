@@ -1,7 +1,6 @@
 # RepoMedic
 
-> **Countdown to Release:** Version 1.2.0 "Jupiter" is launching **tomorrow**! 
-> Stay tuned for new checks, a doctor's verdict, and interactive mode.
+[![Release Countdown](https://img.shields.io/badge/Release-v1.2.0%20Jupiter%20(Tomorrow)-blueviolet?style=for-the-badge)]()
 
 <br />
 
