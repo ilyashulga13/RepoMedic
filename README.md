@@ -1,5 +1,10 @@
 # RepoMedic
 
+> **Countdown to Release:** Version 1.2.0 "Jupiter" is launching **tomorrow**! 
+> Stay tuned for new checks, a doctor's verdict, and interactive mode.
+
+<br />
+
 [![NuGet](https://img.shields.io/nuget/v/RepoMedic.svg)](https://www.nuget.org/packages/RepoMedic)
 [![Publish to NuGet](https://github.com/ilyashulga13/RepoMedic/actions/workflows/publish.yml/badge.svg)](https://github.com/ilyashulga13/RepoMedic/actions/workflows/publish.yml)
 
