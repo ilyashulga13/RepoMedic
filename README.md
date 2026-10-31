@@ -1,6 +1,6 @@
 # RepoMedic
 
-[![Release Countdown](https://img.shields.io/badge/Release-v1.2.0%20Jupiter%20(Tomorrow)-blueviolet?style=for-the-badge)]()
+[![Release Countdown](https://img.shields.io/badge/Release-v1.2.0%20Jupiter%20(Tomorrow)-orange?style=for-the-badge)]()
 
 <br />
 
