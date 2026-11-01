@@ -1,6 +1,6 @@
 # RepoMedic
 
-[![Launch](https://img.shields.io/badge/Launching_Today-Jupiter_v1.2.0_at_12:00-orange?style=for-the-badge)]()
+[![Version](https://img.shields.io/badge/Release-v1.2.0_Jupiter-orange?style=for-the-badge)]()
 
 <br />
 
