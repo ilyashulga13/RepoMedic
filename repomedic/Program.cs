@@ -1,4 +1,4 @@
-using Octokit;
+﻿using Octokit;
 
 namespace repomedic
 {
@@ -67,7 +67,7 @@ namespace repomedic
             while (true)
             {
 
-                Console.ForegroundColor = ConsoleColor.Cyan;
+                Console.ForegroundColor = ConsoleColor.DarkYellow;
                 Console.WriteLine("========================================");
                 Console.WriteLine("         RepoMedic v1.2.0               ");
                 Console.WriteLine("  GitHub Repository Health Checker      ");
@@ -93,6 +93,15 @@ namespace repomedic
                 string owner = "";
                 string repo = "";
 
+                //Easter Egg
+                if (input?.ToLower() == "spooky" || input?.ToLower() == "halloween")
+                {
+                    Console.ForegroundColor = ConsoleColor.DarkMagenta;
+                    Console.WriteLine("\nBOO! You found the Halloween Easter Egg!");
+                    Console.WriteLine("You are a true RepoMedic explorer. Have a spooky day!\n");
+                    Console.ResetColor();
+                    continue;
+                }
 
                 if (!string.IsNullOrEmpty(input))
                 {
