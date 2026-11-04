@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "repomedic": {
+      "commandName": "Project",
+      "commandLineArgs": "--skip-readme"
+    }
+  }
+}

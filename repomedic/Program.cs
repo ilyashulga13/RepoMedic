@@ -1,7 +1,27 @@
-﻿using Octokit;
+﻿/**
+ * !                         !
+ * !                         !
+ * !                         !
+ * !                         !
+ *    v1.3.0 I'M STILL DOING!!
+ * !                         !
+ * !                         !
+ * !                         !
+ * !                         !
+**/
+
+
+using Octokit;
+using System.Text.Json;
 
 namespace repomedic
 {
+    public class RepoMedicConfig
+    {
+        public bool SkipReadme { get; set; } = false;
+        public bool SkipLicense { get; set; } = false;
+    }
+
     internal class Program
     {
 
@@ -64,12 +84,26 @@ namespace repomedic
             bool skipLicenceArg = args.Contains("--skip-license");
             bool skipReadmeArg = args.Contains("--skip-readme");
 
+
+            RepoMedicConfig config = new RepoMedicConfig();
+            string configPath = ".repomedic.json";
+
+            if (File.Exists(configPath))
+            {
+                string jsonString = File.ReadAllText(configPath);
+                config = JsonSerializer.Deserialize<RepoMedicConfig>(jsonString) ?? new RepoMedicConfig();
+
+                Console.ForegroundColor = ConsoleColor.DarkGray;
+                Console.WriteLine("[INFO] Loaded settings from .repomedic.json\n");
+                Console.ResetColor();
+            }
+
             while (true)
             {
 
                 Console.ForegroundColor = ConsoleColor.DarkYellow;
                 Console.WriteLine("========================================");
-                Console.WriteLine("         RepoMedic v1.2.0               ");
+                Console.WriteLine("         RepoMedic v1.3.0               ");
                 Console.WriteLine("  GitHub Repository Health Checker      ");
                 Console.WriteLine("========================================\n");
                 Console.ResetColor();
@@ -136,7 +170,7 @@ namespace repomedic
                 //Checking for errors
                 if (string.IsNullOrEmpty(owner) || string.IsNullOrEmpty(repo))
                 {
-                    Console.WriteLine("Error: invalid format. Please use 'owner/repo' or a valid GitHub URL.");
+                    Console.WriteLine("Error: invalid format. Please use 'owner/repo' or a valid GitHub URL.\n");
                     continue;
                 }
 
@@ -157,8 +191,8 @@ namespace repomedic
                 bool skipLicenceInteractive = Console.ReadLine()?.ToLower() == "y";
 
                 // 3. Combine: if the user entered the flag OR answered 'y', then skip
-                bool skipReadme = skipReadmeArg || skipReadmeInteractive;
-                bool skipLicence = skipLicenceArg || skipLicenceInteractive;
+                bool skipReadme = skipReadmeArg || skipReadmeInteractive || config.SkipReadme;
+                bool skipLicence = skipLicenceArg || skipLicenceInteractive || config.SkipLicense;
 
 
                 if (!string.IsNullOrEmpty(token))
@@ -185,7 +219,7 @@ namespace repomedic
                 }
                 catch (NotFoundException)
                 {
-                    Console.WriteLine("Error: Repository not found!");
+                    Console.WriteLine("Error: Repository not found!\n");
                     continue;
                 }
 
