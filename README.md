@@ -1,6 +1,6 @@
 # RepoMedic
 
-[![Release Countdown](https://img.shields.io/badge/Release-v1.2.0%20Jupiter%20(Tomorrow)-orange?style=for-the-badge)]()
+[![Version](https://img.shields.io/badge/Release-v1.2.0_Jupiter-orange?style=for-the-badge)]()
 
 <br />
 
@@ -112,7 +112,7 @@ I am still learning, so any help is awesome! If you have ideas (like checking fo
 
 ## About me
 
-Hey! I'm Ilya, a 13-year-old developer. I built this tool to practice C# and help beginners. I wrote the whole thing myself (with some advice from a mentor). I'm constantly updating it, so let me know what you think!
+Hey! I'm Ilya, a 13-year-old developer. I built this tool to practice C# and help beginners. I'm constantly updating it, so let me know what you think!
 
 ## License
 
