@@ -110,7 +110,7 @@ namespace repomedic
             {
                 if (!isPro)
                 {
-                    Console.ForegroundColor = ConsoleColor.DarkYellow;
+                    Console.ForegroundColor = ConsoleColor.Magenta;
                     Console.WriteLine("========================================");
                     Console.WriteLine("         RepoMedic v1.3.0               ");
                     Console.WriteLine("  GitHub Repository Health Checker      ");
@@ -146,16 +146,37 @@ namespace repomedic
                 {
                     string[] inputParts = input.Split(' ', StringSplitOptions.RemoveEmptyEntries);
 
+                    // 1. Check known flags
                     if (inputParts.Contains("--pro") || inputParts.Contains("--silent") || inputParts.Contains("--quiet")) isPro = true;
                     if (inputParts.Contains("--skip-readme")) skipReadmeArg = true;
                     if (inputParts.Contains("--skip-license")) skipLicenceArg = true;
 
+                    // 2. Find the repository link (the argument that does not start with "--")
                     input = inputParts.FirstOrDefault(a => !a.StartsWith("--"));
 
+                    // 3. Find unknown flags and warn the user
+                    var unknownFlags = inputParts.Where(a => a.StartsWith("--") && a != "--pro" && a != "--silent" && a != "--quiet" && a != "--skip-readme" && a != "--skip-license").ToList();
+
+                    if (unknownFlags.Any())
+                    {
+                        Console.ForegroundColor = ConsoleColor.Yellow;
+                        Console.WriteLine($"[WARNING] Unknown flag(s) ignored: {string.Join(", ", unknownFlags)}");
+                        Console.ResetColor();
+                    }
+
+                    // 4. If the link is not found ask for it
                     if (string.IsNullOrEmpty(input))
                     {
                         Console.Write("Please enter the repository to check (owner/repo): ");
                         input = Console.ReadLine();
+
+                        if (input != null && input.StartsWith("--"))
+                        {
+                            Console.ForegroundColor = ConsoleColor.Red;
+                            Console.WriteLine("[ERROR] You entered a flag instead of a repository. Restarting...\n");
+                            Console.ResetColor();
+                            continue;
+                        }
                     }
                 }
 
@@ -165,11 +186,27 @@ namespace repomedic
                 string repo = "";
 
                 // Easter Egg
-                if (input?.ToLower() == "spooky" || input?.ToLower() == "halloween")
+                if (input?.ToLower() == "saturn" || input?.ToLower() == "v1.3.0")
                 {
-                    Console.ForegroundColor = ConsoleColor.DarkMagenta;
-                    Console.WriteLine("\nBOO! You found the Halloween Easter Egg!");
-                    Console.WriteLine("You are a true RepoMedic explorer. Have a spooky day!\n");
+                    Console.ForegroundColor = ConsoleColor.DarkYellow;
+                    Console.WriteLine("\n          .         .          ");
+                    Console.WriteLine("      .         .         .    ");
+                    Console.WriteLine("          .-'''''-.          ");
+                    Console.WriteLine("        .'         '.        ");
+                    Console.WriteLine("       /             \\       ");
+                    Console.ForegroundColor = ConsoleColor.Cyan;
+                    Console.WriteLine("  ----|---------------|----  ");
+                    Console.ForegroundColor = ConsoleColor.DarkYellow;
+                    Console.WriteLine("       \\             /       ");
+                    Console.WriteLine("        '.         .'        ");
+                    Console.WriteLine("          '-.....-'          ");
+                    Console.WriteLine("      .         .         .    ");
+                    Console.WriteLine("          .         .          ");
+
+                    Console.WriteLine("\nSecret found!");
+                    Console.WriteLine("You actually typed that? Nice.");
+                    Console.WriteLine("Saturn is pretty cool. I spent like 10 minutes trying to draw these rings using just text characters.");
+                    Console.WriteLine("Anyway, let's go check some repositories!\n");
                     Console.ResetColor();
                     continue;
                 }
@@ -409,7 +446,20 @@ namespace repomedic
                 }
                 else
                 {
-                    Console.WriteLine($"Score: {score}/100");
+                    if (score == 100)
+                    {
+                        Console.WriteLine($"Score: {score}/100");
+                        Console.WriteLine("[SYSTEM] Perfect health detected. You may proceed, human.");
+                    }
+                    else if (score < 50)
+                    {
+                        Console.WriteLine($"Score: {score}/100");
+                        Console.WriteLine("[SYSTEM] Critical failure. Your repository is beyond repair.");
+                    }
+                    else
+                    {
+                        Console.WriteLine($"Score: {score}/100");
+                    }
                 }
 
                 if (isPro)
