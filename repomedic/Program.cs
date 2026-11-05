@@ -34,7 +34,7 @@ namespace repomedic
             }
             catch (NotFoundException)
             {
-                return false; //no file
+                return false; // no file
             }
             catch (RateLimitExceededException)
             {
@@ -47,10 +47,10 @@ namespace repomedic
         {
             try
             {
-                //Ask GitHub to show the contents of the.github/workflows folder
+                // Ask GitHub to show the contents of the.github/workflows folder
                 var files = await github.Repository.Content.GetAllContents(owner, repo, ".github/workflows");
 
-                //If there are files (their number is greater than 0), then Actions is configured
+                // If there are files (their number is greater than 0), then Actions is configured
                 return files.Count > 0; 
             }
             catch (NotFoundException)
@@ -59,19 +59,23 @@ namespace repomedic
             }
         }
 
-        private static void PrintResult(string checkName, bool isSucces, string tip)
+        private static void PrintResult(string checkName, bool isSuccess, string tip, bool isPro)
         {
-            if (isSucces)
+            if (isSuccess)
             {
-                Console.ForegroundColor = ConsoleColor.Green;
-                Console.WriteLine($"[OK] {checkName} found!\n");
+                if (!isPro) Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine(isPro ? $"[OK] {checkName}" : $"[OK] {checkName} found!\n");
             }
             else
             {
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine($"[X] {checkName} not found.");
-                Console.ForegroundColor = ConsoleColor.Yellow;
-                Console.WriteLine($"    Tip: {tip}\n");
+                if (!isPro) Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine(isPro ? $"[X] {checkName}" : $"[X] {checkName} not found.");
+
+                if (!isPro)
+                {
+                    Console.ForegroundColor = ConsoleColor.Yellow;
+                    Console.WriteLine($"    Tip: {tip}\n");
+                }
             }
             Console.ResetColor();
         }
@@ -83,6 +87,7 @@ namespace repomedic
 
             bool skipLicenceArg = args.Contains("--skip-license");
             bool skipReadmeArg = args.Contains("--skip-readme");
+            bool isPro = args.Contains("--pro") || args.Contains("--silent") || args.Contains("--quiet");
 
 
             RepoMedicConfig config = new RepoMedicConfig();
@@ -93,41 +98,73 @@ namespace repomedic
                 string jsonString = File.ReadAllText(configPath);
                 config = JsonSerializer.Deserialize<RepoMedicConfig>(jsonString) ?? new RepoMedicConfig();
 
-                Console.ForegroundColor = ConsoleColor.DarkGray;
-                Console.WriteLine("[INFO] Loaded settings from .repomedic.json\n");
-                Console.ResetColor();
+                if (!isPro)
+                {
+                    Console.ForegroundColor = ConsoleColor.DarkGray;
+                    Console.WriteLine("[INFO] Loaded settings from .repomedic.json\n");
+                    Console.ResetColor();
+                }
             }
 
             while (true)
             {
+                if (!isPro)
+                {
+                    Console.ForegroundColor = ConsoleColor.DarkYellow;
+                    Console.WriteLine("========================================");
+                    Console.WriteLine("         RepoMedic v1.3.0               ");
+                    Console.WriteLine("  GitHub Repository Health Checker      ");
+                    Console.WriteLine("========================================\n");
+                    Console.ResetColor();
+                }
 
-                Console.ForegroundColor = ConsoleColor.DarkYellow;
-                Console.WriteLine("========================================");
-                Console.WriteLine("         RepoMedic v1.3.0               ");
-                Console.WriteLine("  GitHub Repository Health Checker      ");
-                Console.WriteLine("========================================\n");
-                Console.ResetColor();
-
-                //Initilization github
+                // Initilization github
                 GitHubClient? github = null;
 
-                //Initilization token
+                // Initilization token
                 string? token = null;
 
-                //Initilization repoInfo
+                // Initilization repoInfo
                 Repository repoInfo;
 
 
 
-                Console.WriteLine("Please enter GitHub repository (URL or owner/repo): ");
-                var input = Console.ReadLine();
+                string? input = null;
+
+                if (isPro)
+                {
+                    input = args.FirstOrDefault(a => !a.StartsWith("--"));
+                }
+
+                if (string.IsNullOrEmpty(input))
+                {
+                    Console.WriteLine("Please enter GitHub repository (URL or owner/repo). You can add flags like '--pro' or '--skip-license': ");
+                    input = Console.ReadLine();
+                }
+
+                if (!string.IsNullOrEmpty(input))
+                {
+                    string[] inputParts = input.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+
+                    if (inputParts.Contains("--pro") || inputParts.Contains("--silent") || inputParts.Contains("--quiet")) isPro = true;
+                    if (inputParts.Contains("--skip-readme")) skipReadmeArg = true;
+                    if (inputParts.Contains("--skip-license")) skipLicenceArg = true;
+
+                    input = inputParts.FirstOrDefault(a => !a.StartsWith("--"));
+
+                    if (string.IsNullOrEmpty(input))
+                    {
+                        Console.Write("Please enter the repository to check (owner/repo): ");
+                        input = Console.ReadLine();
+                    }
+                }
 
 
-                //Initilization owner/repo
+                // Initilization owner/repo
                 string owner = "";
                 string repo = "";
 
-                //Easter Egg
+                // Easter Egg
                 if (input?.ToLower() == "spooky" || input?.ToLower() == "halloween")
                 {
                     Console.ForegroundColor = ConsoleColor.DarkMagenta;
@@ -167,7 +204,7 @@ namespace repomedic
 
                 }
 
-                //Checking for errors
+                // Checking for errors
                 if (string.IsNullOrEmpty(owner) || string.IsNullOrEmpty(repo))
                 {
                     Console.WriteLine("Error: invalid format. Please use 'owner/repo' or a valid GitHub URL.\n");
@@ -175,20 +212,34 @@ namespace repomedic
                 }
 
 
-                //Enter token
+                // Enter token
                 // 1. First, ask for the token (and read it immediately)
-                Console.WriteLine("\nTip: A GitHub token increases your API limit from 60 to 5000 requests/hour.");
-                Console.Write("Please enter your GitHub token (or press Enter to skip): ");
-                token = Console.ReadLine();
+                if (isPro)
+                {
+                    token = Environment.GetEnvironmentVariable("GITHUB_TOKEN");
+                }
+                else
+                {
+                    // Normal mode
+                    Console.WriteLine("\nTip: A GitHub token increases your API limit from 60 to 5000 requests/hour.");
+                    Console.Write("Please enter your GitHub token (or press Enter to skip): ");
+                    token = Console.ReadLine();
+                }
 
-                // 2. Then we ask about the absences
-                Console.WriteLine("\nDo you want to skip any checks?");
+                bool skipReadmeInteractive = false;
+                bool skipLicenceInteractive = false;
 
-                Console.Write("Skip README.md check? (y/n): ");
-                bool skipReadmeInteractive = Console.ReadLine()?.ToLower() == "y";
+                if (!isPro)
+                {
+                    // 2. Then we ask about the absences
+                    Console.WriteLine("\nDo you want to skip any checks?");
 
-                Console.Write("Skip LICENSE check? (y/n): ");
-                bool skipLicenceInteractive = Console.ReadLine()?.ToLower() == "y";
+                    Console.Write("Skip README.md check? (y/n): ");
+                    skipReadmeInteractive = Console.ReadLine()?.ToLower() == "y";
+
+                    Console.Write("Skip LICENSE check? (y/n): ");
+                    skipLicenceInteractive = Console.ReadLine()?.ToLower() == "y";
+                }
 
                 // 3. Combine: if the user entered the flag OR answered 'y', then skip
                 bool skipReadme = skipReadmeArg || skipReadmeInteractive || config.SkipReadme;
@@ -197,7 +248,7 @@ namespace repomedic
 
                 if (!string.IsNullOrEmpty(token))
                 {
-                    //If you have entered your token, you will have 5000 requests per hour
+                    // If you have entered your token, you will have 5000 requests per hour
 
                     github = new GitHubClient(new ProductHeaderValue("RepoMedic"))
                     {
@@ -207,7 +258,7 @@ namespace repomedic
                 }
                 else
                 {
-                    //If not then 60 requests per hour
+                    // If not then 60 requests per hour
 
                     github = new GitHubClient(new ProductHeaderValue("RepoMedic"));
 
@@ -220,20 +271,30 @@ namespace repomedic
                 catch (NotFoundException)
                 {
                     Console.WriteLine("Error: Repository not found!\n");
+                    if (isPro) Environment.Exit(1);
+                    continue;
+                }
+                catch (AuthorizationException)
+                {
+                    Console.WriteLine("Error: Invalid GitHub token. Please check your credentials.\n");
+                    if (isPro) Environment.Exit(1);
                     continue;
                 }
 
 
-                //Conclusion
-                Console.ForegroundColor = ConsoleColor.DarkGray;
-                Console.WriteLine("\n----------------------------------------");
-                Console.WriteLine($"Checking: {owner}/{repo}");
-                Console.WriteLine("----------------------------------------\n");
-                Console.ResetColor();
+                // Conclusion
+                if (!isPro)
+                {
+                    Console.ForegroundColor = ConsoleColor.DarkGray;
+                    Console.WriteLine("\n----------------------------------------");
+                    Console.WriteLine($"Checking: {owner}/{repo}");
+                    Console.WriteLine("----------------------------------------\n");
+                    Console.ResetColor();
+                }
 
                 Console.WriteLine("\nChecking repository...\n");
 
-                //bool
+                // bool
                 bool hasREADME = false;
                 if(!skipReadme)
                 {
@@ -254,45 +315,56 @@ namespace repomedic
                 bool hasContributing = await FileExists(github, owner, repo, "CONTRIBUTING.md");
                 bool hasDescription = !string.IsNullOrEmpty(repoInfo.Description);
 
-
-                Console.ForegroundColor = ConsoleColor.DarkGray;
-                Console.WriteLine("----------------------------------------\n");
-                Console.ResetColor();
+                if (!isPro)
+                {
+                    Console.ForegroundColor = ConsoleColor.DarkGray;
+                    Console.WriteLine("----------------------------------------\n");
+                    Console.ResetColor();
+                }
 
                 // Output result
                 if (!skipReadme)
                 {
-                    PrintResult("README.md", hasREADME, "Add README.md in your repository");
+                    PrintResult("README.md", hasREADME, "Add README.md in your repository", isPro);
                 }
                 else
                 {
-                    Console.ForegroundColor = ConsoleColor.DarkGray;
-                    Console.WriteLine("[INFO] Skipped README.md check (--skip-readme)\n");
-                    Console.ResetColor();
+                    if (!isPro)
+                    {
+                        Console.ForegroundColor = ConsoleColor.DarkGray;
+                        Console.WriteLine("[INFO] Skipped README.md check (--skip-readme)\n");
+                        Console.ResetColor();
+                    }
                 }
 
-                PrintResult(".gitignore", hasGitignore, "Add .gitignore to ignore bin/ and obj/");
+                PrintResult(".gitignore", hasGitignore, "Add .gitignore to ignore bin/ and obj/", isPro);
 
                 if (!skipLicence)
                 {
-                    PrintResult("LICENSE", hasLICENSE, "Add LICENSE to your repository");
+                    PrintResult("LICENSE", hasLICENSE, "Add LICENSE to your repository", isPro);
                 }
                 else
                 {
+                    if (!isPro)
+                    {
+                        Console.ForegroundColor = ConsoleColor.DarkGray;
+                        Console.WriteLine("[INFO] Skipped LICENSE check (--skip-license)\n");
+                        Console.ResetColor();
+                    }
+                }
+
+                PrintResult("GitHub Actions", hasWorkflows, "Add a .github/workflows folder for CI/CD", isPro);
+                PrintResult("CONTRIBUTING.md", hasContributing, "Add CONTRIBUTING.md to guide new contributors.", isPro);
+                PrintResult("Repository Description", hasDescription, "Add a short description in the 'About' section on GitHub.", isPro);
+
+                if (!isPro)
+                {
                     Console.ForegroundColor = ConsoleColor.DarkGray;
-                    Console.WriteLine("[INFO] Skipped LICENSE check (--skip-license)\n");
+                    Console.WriteLine("----------------------------------------\n");
                     Console.ResetColor();
                 }
 
-                PrintResult("GitHub Actions", hasWorkflows, "Add a .github/workflows folder for CI/CD");
-                PrintResult("CONTRIBUTING.md", hasContributing, "Add CONTRIBUTING.md to guide new contributors.");
-                PrintResult("Repository Description", hasDescription, "Add a short description in the 'About' section on GitHub.");
-
-                Console.ForegroundColor = ConsoleColor.DarkGray;
-                Console.WriteLine("----------------------------------------");
-                Console.ResetColor();
-
-                //SCORE system
+                // SCORE system
                 int passed = 0;
                 int total = 0;
 
@@ -322,47 +394,31 @@ namespace repomedic
 
                 int score = (passed * 100) / total;
 
-                //output score
-                if (score >= 75)
+                // output grade and score
+                if (!isPro)
                 {
-                    Console.ForegroundColor = ConsoleColor.Green;
-                    Console.WriteLine($"\nYour score: {score}/100");
-                    Console.ResetColor();
-                }
-                else if (score >= 50)
-                {
-                    Console.ForegroundColor = ConsoleColor.Yellow;
-                    Console.WriteLine($"\nYour score: {score}/100");
+                    if (score >= 75) { Console.ForegroundColor = ConsoleColor.Green; Console.WriteLine($"\nYour score: {score}/100"); Console.ResetColor(); }
+                    else if (score >= 50) { Console.ForegroundColor = ConsoleColor.Yellow; Console.WriteLine($"\nYour score: {score}/100"); Console.ResetColor(); }
+                    else { Console.ForegroundColor = ConsoleColor.Red; Console.WriteLine($"\nYour score: {score}/100"); Console.ResetColor(); }
+
+                    Console.WriteLine();
+                    if (score == 100) { Console.ForegroundColor = ConsoleColor.Green; Console.WriteLine("PERFECT! Your repository is in ideal health!"); }
+                    else if (score >= 50) { Console.ForegroundColor = ConsoleColor.Yellow; Console.WriteLine("Not bad, but your repo needs a little checkup."); }
+                    else { Console.ForegroundColor = ConsoleColor.Red; Console.WriteLine("Ouch... Your repository is sick. Let's fix it!"); }
                     Console.ResetColor();
                 }
                 else
                 {
-                    Console.ForegroundColor = ConsoleColor.Red;
-                    Console.WriteLine($"\nYour score: {score}/100");
-                    Console.ResetColor();
+                    Console.WriteLine($"Score: {score}/100");
                 }
 
-                Console.WriteLine();
+                if (isPro)
+                {
+                    // If the repository is bad(less than 50), return code 1.If it is good, return 0.
+                    Environment.Exit(score < 50 ? 1 : 0);
+                }
 
-                //output grade
-                if (score == 100)
-                {
-                    Console.ForegroundColor = ConsoleColor.Green;
-                    Console.WriteLine("PERFECT! Your repository is in ideal health!");
-                }
-                else if (score >= 50)
-                {
-                    Console.ForegroundColor = ConsoleColor.Yellow;
-                    Console.WriteLine("Not bad, but your repo needs a little checkup.");
-                }
-                else
-                {
-                    Console.ForegroundColor = ConsoleColor.Red;
-                    Console.WriteLine("Ouch... Your repository is sick. Let's fix it!");
-                }
-                Console.ResetColor();
-
-                //I request from the user :3
+                // I request from the user :3
                 Console.WriteLine("\nDo you want to check another repository? (y/n)");
                 var answer = Console.ReadLine();
 
