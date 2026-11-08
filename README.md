@@ -1,6 +1,6 @@
 # RepoMedic
 
-[![Launching Soon](https://img.shields.io/badge/Releasing_Today-Saturn_v1.3.0_at_12:00-orange?style=for-the-badge)]()
+[![Version](https://img.shields.io/badge/Release-v1.3.0_Saturn-orange?style=for-the-badge)]()
 
 <br />
 
@@ -18,10 +18,11 @@ When starting a new project, it is easy to forget the small but crucial details 
 - Checks for `README.md`, `.gitignore`, and `LICENSE` (supports `LICENSE`, `LICENSE.md`, `LICENSE.txt`).
 - Checks if GitHub Actions are set up (in the `.github/workflows` folder).
 - Checks for `CONTRIBUTING.md` and Repository Description.
-- **Flexible:** You can skip checks using interactive prompts or command-line flags (`--skip-license`, `--skip-readme`).
+- **Flexible:** You can skip checks using interactive prompts, command-line flags (`--skip-license`, `--skip-readme`), or a `.repomedic.json` config file.
 - **Interactive:** Check multiple repositories without restarting the program.
 - Gives a final "Doctor's Verdict" based on your score.
 - **Pro Mode (`--pro`, `--silent`, `--quiet`):** For CI/CD pipelines. Disables prompts and colors, and returns an Exit Code 1 if the score is below 50.
+- **Achievements System:** Unlock special in-game style achievements for your activity. View them using `--achievements` or `-a`.
 
 ## Installation
 
@@ -90,7 +91,7 @@ Every repository starts with 0 points. RepoMedic checks for 6 essential things:
 - **CONTRIBUTING.md**
 - **Repository Description**
 
-Each check is worth an equal percentage of the final score. If you skip a check using the interactive prompt or flags, the total score is recalculated dynamically.
+Each check is worth an equal percentage of the final score. If you skip a check using the interactive prompt, flags, or your JSON config, the total score is recalculated dynamically.
 
 ### Why should I use a token?
 
