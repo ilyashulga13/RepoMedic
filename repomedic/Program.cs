@@ -1,5 +1,7 @@
 using Octokit;
 using System.Text.Json;
+using System.Linq;
+using System.IO;
 
 namespace repomedic
 {
@@ -7,10 +9,15 @@ namespace repomedic
     {
         public bool SkipReadme { get; set; } = false;
         public bool SkipLicense { get; set; } = false;
+        public bool SkipGitignore { get; set; } = false;
+        public bool SkipActions { get; set; } = false;
+        public bool SkipContributing { get; set; } = false;
+        public bool SkipDescription { get; set; } = false;
     }
 
     internal class Program
     {
+        private static string achievementsPath = "achievements.txt";
 
         private static async Task<bool> FileExists(GitHubClient github, string? owner, string? repo, string? filename)
         {
@@ -34,15 +41,12 @@ namespace repomedic
         {
             try
             {
-                // Ask GitHub to show the contents of the.github/workflows folder
                 var files = await github.Repository.Content.GetAllContents(owner, repo, ".github/workflows");
-
-                // If there are files (their number is greater than 0), then Actions is configured
-                return files.Count > 0; 
+                return files.Count > 0;
             }
             catch (NotFoundException)
             {
-                return false;                
+                return false;
             }
         }
 
@@ -67,15 +71,66 @@ namespace repomedic
             Console.ResetColor();
         }
 
+        private static void UnlockAchievement(string achievement, bool isPro)
+        {
+            List<string> achievements = new List<string>();
+            if (File.Exists(achievementsPath))
+            {
+                achievements = File.ReadAllLines(achievementsPath).ToList();
+            }
+
+            if (!achievements.Contains(achievement))
+            {
+                achievements.Add(achievement);
+                File.WriteAllLines(achievementsPath, achievements);
+
+                if (!isPro)
+                {
+                    Console.ForegroundColor = ConsoleColor.Cyan;
+                    Console.WriteLine($"\n[NEW ACHIEVEMENT] {achievement}");
+                    Console.ResetColor();
+                }
+            }
+        }
+
         static async Task Main(string[] args)
         {
-
             Console.OutputEncoding = System.Text.Encoding.UTF8;
+
+            // Check for --achievements command
+            if (args.Contains("--achievements") || args.Contains("-a"))
+            {
+                Console.ForegroundColor = ConsoleColor.Magenta;
+                Console.WriteLine("========================================");
+                Console.WriteLine("         RepoMedic Achievements         ");
+                Console.WriteLine("========================================\n");
+                Console.ResetColor();
+
+                if (File.Exists(achievementsPath))
+                {
+                    string[] unlocked = File.ReadAllLines(achievementsPath);
+                    if (unlocked.Length == 0)
+                    {
+                        Console.WriteLine("No achievements yet. Go check some repos!");
+                    }
+                    else
+                    {
+                        foreach (var item in unlocked)
+                        {
+                            Console.WriteLine($"[Unlocked] {item}");
+                        }
+                    }
+                }
+                else
+                {
+                    Console.WriteLine("No achievements yet. Go check some repos!");
+                }
+                return;
+            }
 
             bool skipLicenceArg = args.Contains("--skip-license");
             bool skipReadmeArg = args.Contains("--skip-readme");
             bool isPro = args.Contains("--pro") || args.Contains("--silent") || args.Contains("--quiet");
-
 
             RepoMedicConfig config = new RepoMedicConfig();
             string configPath = ".repomedic.json";
@@ -105,16 +160,9 @@ namespace repomedic
                     Console.ResetColor();
                 }
 
-                // Initilization github
                 GitHubClient? github = null;
-
-                // Initilization token
                 string? token = null;
-
-                // Initilization repoInfo
                 Repository repoInfo;
-
-
 
                 string? input = null;
 
@@ -133,17 +181,13 @@ namespace repomedic
                 {
                     string[] inputParts = input.Split(' ', StringSplitOptions.RemoveEmptyEntries);
 
-                    // 1. Check known flags
                     if (inputParts.Contains("--pro") || inputParts.Contains("--silent") || inputParts.Contains("--quiet")) isPro = true;
                     if (inputParts.Contains("--skip-readme")) skipReadmeArg = true;
                     if (inputParts.Contains("--skip-license")) skipLicenceArg = true;
 
-                    // 2. Find the repository link (the argument that does not start with "--")
                     input = inputParts.FirstOrDefault(a => !a.StartsWith("--"));
 
-                    // 3. Find unknown flags and warn the user
                     var unknownFlags = inputParts.Where(a => a.StartsWith("--") && a != "--pro" && a != "--silent" && a != "--quiet" && a != "--skip-readme" && a != "--skip-license").ToList();
-
                     if (unknownFlags.Any())
                     {
                         Console.ForegroundColor = ConsoleColor.Yellow;
@@ -151,7 +195,6 @@ namespace repomedic
                         Console.ResetColor();
                     }
 
-                    // 4. If the link is not found ask for it
                     if (string.IsNullOrEmpty(input))
                     {
                         Console.Write("Please enter the repository to check (owner/repo): ");
@@ -167,8 +210,6 @@ namespace repomedic
                     }
                 }
 
-
-                // Initilization owner/repo
                 string owner = "";
                 string repo = "";
 
@@ -201,20 +242,14 @@ namespace repomedic
                 if (!string.IsNullOrEmpty(input))
                 {
                     input = input.Replace(".git", "");
-
                     string[] parts = input.Split('/');
-
 
                     if (input.Contains("github.com"))
                     {
                         if (parts.Length >= 2)
                         {
-                            // parts. Length - 1 is always the last element
-                            // parts. Length - 2 is the penultimate
-
                             owner = parts[parts.Length - 2];
                             repo = parts[parts.Length - 1];
-
                         }
                     }
                     else
@@ -225,7 +260,6 @@ namespace repomedic
                             repo = parts[1];
                         }
                     }
-
                 }
 
                 // Checking for errors
@@ -235,16 +269,13 @@ namespace repomedic
                     continue;
                 }
 
-
                 // Enter token
-                // 1. First, ask for the token (and read it immediately)
                 if (isPro)
                 {
                     token = Environment.GetEnvironmentVariable("GITHUB_TOKEN");
                 }
                 else
                 {
-                    // Normal mode
                     Console.WriteLine("\nTip: A GitHub token increases your API limit from 60 to 5000 requests/hour.");
                     Console.Write("Please enter your GitHub token (or press Enter to skip): ");
                     token = Console.ReadLine();
@@ -255,9 +286,7 @@ namespace repomedic
 
                 if (!isPro)
                 {
-                    // 2. Then we ask about the absences
                     Console.WriteLine("\nDo you want to skip any checks?");
-
                     Console.Write("Skip README.md check? (y/n): ");
                     skipReadmeInteractive = Console.ReadLine()?.ToLower() == "y";
 
@@ -265,27 +294,19 @@ namespace repomedic
                     skipLicenceInteractive = Console.ReadLine()?.ToLower() == "y";
                 }
 
-                // 3. Combine: if the user entered the flag OR answered 'y', then skip
                 bool skipReadme = skipReadmeArg || skipReadmeInteractive || config.SkipReadme;
                 bool skipLicence = skipLicenceArg || skipLicenceInteractive || config.SkipLicense;
 
-
                 if (!string.IsNullOrEmpty(token))
                 {
-                    // If you have entered your token, you will have 5000 requests per hour
-
                     github = new GitHubClient(new ProductHeaderValue("RepoMedic"))
                     {
                         Credentials = new Credentials(token)
                     };
-
                 }
                 else
                 {
-                    // If not then 60 requests per hour
-
                     github = new GitHubClient(new ProductHeaderValue("RepoMedic"));
-
                 }
 
                 try
@@ -305,8 +326,6 @@ namespace repomedic
                     continue;
                 }
 
-
-                // Conclusion
                 if (!isPro)
                 {
                     Console.ForegroundColor = ConsoleColor.DarkGray;
@@ -318,26 +337,12 @@ namespace repomedic
 
                 Console.WriteLine("\nChecking repository...\n");
 
-                // bool
-                bool hasREADME = false;
-                if(!skipReadme)
-                {
-                    hasREADME = await FileExists(github, owner, repo, "README.md");
-                }
-
-                bool hasGitignore = await FileExists(github, owner, repo, ".gitignore");
-
-                bool hasLICENSE = false;
-                if (!skipLicence)
-                {
-                    hasLICENSE = await FileExists(github, owner, repo, "LICENSE")
-                    || await FileExists(github, owner, repo, "LICENSE.md")
-                    || await FileExists(github, owner, repo, "LICENSE.txt");
-                }
-
-                bool hasWorkflows = await HasWorkflows(github, owner, repo);
-                bool hasContributing = await FileExists(github, owner, repo, "CONTRIBUTING.md");
-                bool hasDescription = !string.IsNullOrEmpty(repoInfo.Description);
+                bool hasREADME = skipReadme ? false : await FileExists(github, owner, repo, "README.md");
+                bool hasGitignore = config.SkipGitignore ? false : await FileExists(github, owner, repo, ".gitignore");
+                bool hasLICENSE = skipLicence ? false : (await FileExists(github, owner, repo, "LICENSE") || await FileExists(github, owner, repo, "LICENSE.md") || await FileExists(github, owner, repo, "LICENSE.txt"));
+                bool hasWorkflows = config.SkipActions ? false : await HasWorkflows(github, owner, repo);
+                bool hasContributing = config.SkipContributing ? false : await FileExists(github, owner, repo, "CONTRIBUTING.md");
+                bool hasDescription = config.SkipDescription ? false : !string.IsNullOrEmpty(repoInfo.Description);
 
                 if (!isPro)
                 {
@@ -346,40 +351,12 @@ namespace repomedic
                     Console.ResetColor();
                 }
 
-                // Output result
-                if (!skipReadme)
-                {
-                    PrintResult("README.md", hasREADME, "Add README.md in your repository", isPro);
-                }
-                else
-                {
-                    if (!isPro)
-                    {
-                        Console.ForegroundColor = ConsoleColor.DarkGray;
-                        Console.WriteLine("[INFO] Skipped README.md check (--skip-readme)\n");
-                        Console.ResetColor();
-                    }
-                }
-
-                PrintResult(".gitignore", hasGitignore, "Add .gitignore to ignore bin/ and obj/", isPro);
-
-                if (!skipLicence)
-                {
-                    PrintResult("LICENSE", hasLICENSE, "Add LICENSE to your repository", isPro);
-                }
-                else
-                {
-                    if (!isPro)
-                    {
-                        Console.ForegroundColor = ConsoleColor.DarkGray;
-                        Console.WriteLine("[INFO] Skipped LICENSE check (--skip-license)\n");
-                        Console.ResetColor();
-                    }
-                }
-
-                PrintResult("GitHub Actions", hasWorkflows, "Add a .github/workflows folder for CI/CD", isPro);
-                PrintResult("CONTRIBUTING.md", hasContributing, "Add CONTRIBUTING.md to guide new contributors.", isPro);
-                PrintResult("Repository Description", hasDescription, "Add a short description in the 'About' section on GitHub.", isPro);
+                if (!skipReadme) PrintResult("README.md", hasREADME, "Add README.md in your repository", isPro);
+                if (!config.SkipGitignore) PrintResult(".gitignore", hasGitignore, "Add .gitignore to ignore bin/ and obj/", isPro);
+                if (!skipLicence) PrintResult("LICENSE", hasLICENSE, "Add LICENSE to your repository", isPro);
+                if (!config.SkipActions) PrintResult("GitHub Actions", hasWorkflows, "Add a .github/workflows folder for CI/CD", isPro);
+                if (!config.SkipContributing) PrintResult("CONTRIBUTING.md", hasContributing, "Add CONTRIBUTING.md to guide new contributors.", isPro);
+                if (!config.SkipDescription) PrintResult("Repository Description", hasDescription, "Add a short description in the 'About' section on GitHub.", isPro);
 
                 if (!isPro)
                 {
@@ -388,37 +365,18 @@ namespace repomedic
                     Console.ResetColor();
                 }
 
-                // SCORE system
                 int passed = 0;
                 int total = 0;
 
-                if (!skipReadme)
-                {
-                    total++;
-                    if (hasREADME) passed++;
-                }
+                if (!skipReadme) { total++; if (hasREADME) passed++; }
+                if (!config.SkipGitignore) { total++; if (hasGitignore) passed++; }
+                if (!skipLicence) { total++; if (hasLICENSE) passed++; }
+                if (!config.SkipActions) { total++; if (hasWorkflows) passed++; }
+                if (!config.SkipContributing) { total++; if (hasContributing) passed++; }
+                if (!config.SkipDescription) { total++; if (hasDescription) passed++; }
 
-                total++;
-                if (hasGitignore) passed++;
+                int score = total == 0 ? 100 : (passed * 100) / total;
 
-                if (!skipLicence)
-                {
-                    total++;
-                    if (hasLICENSE) passed++;
-                }
-
-                total++;
-                if (hasWorkflows) passed++;
-
-                total++;
-                if (hasContributing) passed++;
-
-                total++;
-                if (hasDescription) passed++;
-
-                int score = (passed * 100) / total;
-
-                // output grade and score
                 if (!isPro)
                 {
                     if (score >= 75) { Console.ForegroundColor = ConsoleColor.Green; Console.WriteLine($"\nYour score: {score}/100"); Console.ResetColor(); }
@@ -426,50 +384,43 @@ namespace repomedic
                     else { Console.ForegroundColor = ConsoleColor.Red; Console.WriteLine($"\nYour score: {score}/100"); Console.ResetColor(); }
 
                     Console.WriteLine();
+
                     if (score == 100) { Console.ForegroundColor = ConsoleColor.Green; Console.WriteLine("PERFECT! Your repository is in ideal health!"); }
                     else if (score >= 50) { Console.ForegroundColor = ConsoleColor.Yellow; Console.WriteLine("Not bad, but your repo needs a little checkup."); }
                     else { Console.ForegroundColor = ConsoleColor.Red; Console.WriteLine("Ouch... Your repository is sick. Let's fix it!"); }
                     Console.ResetColor();
+
+                    // SAVE ACHIEVEMENTS
+                    if (score == 100) UnlockAchievement("Perfect Health", isPro);
+                    if (isPro) UnlockAchievement("Silent Assassin", isPro);
+                    if (total == 0) UnlockAchievement("Ghost Repo", isPro);
+                    else if (skipReadme || skipLicence || config.SkipGitignore || config.SkipActions) UnlockAchievement("Selective Surgeon", isPro);
                 }
                 else
                 {
-                    if (score == 100)
-                    {
-                        Console.WriteLine($"Score: {score}/100");
-                        Console.WriteLine("[SYSTEM] Perfect health detected. You may proceed, human.");
-                    }
-                    else if (score < 50)
-                    {
-                        Console.WriteLine($"Score: {score}/100");
-                        Console.WriteLine("[SYSTEM] Critical failure. Your repository is beyond repair.");
-                    }
-                    else
-                    {
-                        Console.WriteLine($"Score: {score}/100");
-                    }
+                    if (score == 100) Console.WriteLine($"Score: {score}/100\n[SYSTEM] Perfect health detected. You may proceed, human.");
+                    else if (score < 50) Console.WriteLine($"Score: {score}/100\n[SYSTEM] Critical failure. Your repository is beyond repair.");
+                    else Console.WriteLine($"Score: {score}/100");
+
+                    // Save silently in Pro mode
+                    if (score == 100) UnlockAchievement("Perfect Health", true);
+                    if (isPro) UnlockAchievement("Silent Assassin", true);
+                    if (total == 0) UnlockAchievement("Ghost Repo", true);
+                    else if (skipReadme || skipLicence || config.SkipGitignore || config.SkipActions) UnlockAchievement("Selective Surgeon", true);
                 }
 
                 if (isPro)
                 {
-                    // If the repository is bad(less than 50), return code 1.If it is good, return 0.
                     Environment.Exit(score < 50 ? 1 : 0);
                 }
 
-                // I request from the user :3
                 Console.WriteLine("\nDo you want to check another repository? (y/n)");
                 var answer = Console.ReadLine();
 
-
-
-                if (answer?.ToLower() != "y")
-                {
-                      break;
-                }
+                if (answer?.ToLower() != "y") break;
 
                 Console.Clear();
-
             }
-
         }
     }
 }

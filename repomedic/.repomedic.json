@@ -1,4 +1,8 @@
 ﻿{
     "SkipReadme": false,
-    "SkipLicense": false
+    "SkipLicense": false,
+    "SkipGitignore": true,
+    "SkipActions": true,
+    "SkipContributing": false,
+    "SkipDescription": false
 }
