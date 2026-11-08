@@ -1,16 +1,3 @@
-﻿/**
- * !                         !
- * !                         !
- * !                         !
- * !                         !
- *    v1.3.0 I'M STILL DOING!!
- * !                         !
- * !                         !
- * !                         !
- * !                         !
-**/
-
-
 using Octokit;
 using System.Text.Json;
 
