@@ -1,6 +1,6 @@
 # RepoMedic
 
-[![Version](https://img.shields.io/badge/Release-v1.2.0_Jupiter-orange?style=for-the-badge)]()
+[![Launching Soon](https://img.shields.io/badge/Releasing_Today-Saturn_v1.3.0_at_12:00-orange?style=for-the-badge)]()
 
 <br />
 
@@ -21,6 +21,7 @@ When starting a new project, it is easy to forget the small but crucial details 
 - **Flexible:** You can skip checks using interactive prompts or command-line flags (`--skip-license`, `--skip-readme`).
 - **Interactive:** Check multiple repositories without restarting the program.
 - Gives a final "Doctor's Verdict" based on your score.
+- **Pro Mode (`--pro`, `--silent`, `--quiet`):** For CI/CD pipelines. Disables prompts and colors, and returns an Exit Code 1 if the score is below 50.
 
 ## Installation
 
@@ -38,6 +39,12 @@ Once installed, simply run the command in your terminal:
 
 ```bash
 repomedic
+```
+
+For CI/CD pipelines (Pro Mode), you can pass arguments directly:
+
+```bash
+repomedic --pro owner/repo
 ```
 
 The app will ask you for a GitHub repository, your token (optional), and if you want to skip any specific checks.
